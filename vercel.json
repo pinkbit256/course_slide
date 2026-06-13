@@ -1,0 +1,5 @@
+{
+  "installCommand": "cd ooc_slide && npm ci",
+  "buildCommand": "cd ooc_slide && npm run build",
+  "outputDirectory": "ooc_slide/dist"
+}

@@ -218,7 +218,7 @@ public List<String> getDisplayLines() {
 
 # equals() and hashCode()
 
-`Participant` defines equality by normalized email address.
+`Participant` uses one identity rule: the normalized e-mail address.
 
 ```java {all|2-5|8}
 public void setEmail(String email) {
@@ -233,19 +233,19 @@ private String normalizeEmail(String value) {
 }
 ```
 
-```java {all|1-10|12-15}
+`equals()` and `hashCode()` must use the same field.
+
+```java {all|2|7}
 @Override
 public boolean equals(Object other) {
-    if (this == other) {
-        return true;
-    }
-    if (!(other instanceof Participant)) {
-        return false;
-    }
+    if (this == other) return true;
+    if (!(other instanceof Participant)) return false;
     Participant that = (Participant) other;
     return Objects.equals(email, that.email);
 }
+```
 
+```java {all|3}
 @Override
 public int hashCode() {
     return Objects.hash(email);
@@ -285,11 +285,11 @@ Also tested:
 
 Problem found while checking duplicate participant behavior:
 
-- README says participants should be equal by email
+- Project docs mentioned e-mail / matriculation number
 - Test creates `xue@example.com` and `XUE@example.com`
 - Email is normalized to lowercase
-- Old equality logic compared matriculation number instead
-- Old `hashCode()` used both email and matriculation number
+- Equality must use one stable identity rule
+- `hashCode()` must match the same field as `equals()`
 
 Fix:
 

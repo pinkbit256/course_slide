@@ -8,8 +8,6 @@
     "export": "slidev export slides.md"
   },
   "dependencies": {
-    "@oxc-parser/binding-darwin-arm64": "^0.135.0",
-    "@rolldown/binding-darwin-arm64": "^1.0.3",
     "@slidev/cli": "^52.11.3",
     "@slidev/theme-default": "latest",
     "@slidev/theme-seriph": "latest",

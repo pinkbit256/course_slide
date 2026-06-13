@@ -106,11 +106,11 @@ Why:
 
 ---
 
-# Polymorphism and Overriding
+# Polymorphism: Activity Types
 
 `CampusActivity` references can call subclass behavior.
 
-```java {all|1-4|6-10}
+```java {all|1-4|6-13}
 public abstract class CampusActivity {
     public abstract String getActivityType();
     public String describe() { ... }
@@ -121,14 +121,64 @@ public class Workshop extends CampusActivity {
     public String getActivityType() {
         return "Workshop";
     }
+
+    @Override
+    public String describe() {
+        return super.describe() + " Topic: " + topic;
+    }
 }
 ```
 
-The same pattern is used in `Registration`:
+`getDisplayLines()` stores activities as `CampusActivity`, but each object
+uses its own `describe()` implementation.
 
-- `getFee()` returns 5.0 for students, 0.0 for volunteers/speakers
-- `getPriority()` gives waiting-list priority to speakers and volunteers
-- `getRegistrationType()` changes the display text
+---
+
+# Polymorphism: Registration Types
+
+The GUI creates different subclasses, but the rest of the app receives
+one common type: `Registration`.
+
+```java {all|1|3|6|9}
+private Registration createRegistration(Participant participant) {
+    if ("Volunteer".equals(type)) {
+        return new VolunteerRegistration(participant);
+    }
+    if ("Speaker".equals(type)) {
+        return new SpeakerRegistration(participant);
+    }
+    return new StudentRegistration(participant);
+}
+```
+
+After this point, `CampusActivity` does not need to know the exact subclass.
+
+---
+
+# Polymorphism: Dynamic Dispatch
+
+`Registration.describe()` calls methods that subclasses override.
+
+```java {all|1-4|6-9}
+public String describe() {
+    return getRegistrationType()
+        + ": " + participant
+        + ", fee EUR " + getFee();
+}
+
+public double getFee() { return 10.0; }       // base
+// StudentRegistration: 5.0
+// Volunteer/Speaker: 0.0
+```
+
+The same happens when the waiting list is sorted:
+
+```java {all|1|3-5}
+waitingList.sort((first, second) ->
+    Integer.compare(
+        second.getPriority(),
+        first.getPriority()));
+```
 
 ---
 
@@ -216,7 +266,7 @@ public List<String> getDisplayLines() {
 
 ---
 
-# equals() and hashCode()
+# equals(): Participant Identity
 
 `Participant` uses one identity rule: the normalized e-mail address.
 
@@ -233,7 +283,13 @@ private String normalizeEmail(String value) {
 }
 ```
 
-`equals()` and `hashCode()` must use the same field.
+That means `XUE@example.com` and `xue@example.com` become the same identity.
+
+---
+
+# equals(): Same Email, Same Person
+
+`equals()` compares only the normalized e-mail field.
 
 ```java {all|2|7}
 @Override
@@ -245,12 +301,30 @@ public boolean equals(Object other) {
 }
 ```
 
+This is used when the app checks for duplicate participants in an activity.
+
+---
+
+# hashCode(): Same Rule for HashSet
+
+`HashSet<Participant>` uses `hashCode()` first, then `equals()`.
+Both methods must use the same identity field.
+
 ```java {all|3}
 @Override
 public int hashCode() {
     return Objects.hash(email);
 }
 ```
+
+```java {all|1|3}
+private final HashSet<Participant> participants;
+
+participants.add(registration.getParticipant());
+```
+
+If two participants have the same normalized e-mail, they produce the same
+hash input and compare equal.
 
 ---
 

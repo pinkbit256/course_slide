@@ -268,28 +268,29 @@ public List<String> getDisplayLines() {
 
 # equals(): Participant Identity
 
-`Participant` uses one identity rule: the normalized e-mail address.
+`Participant` uses one identity rule: the matriculation number.
+E-mail is still stored, but it is not the unique identifier.
 
-```java {all|2-5|8}
+```java {all|1-4|6-9}
 public void setEmail(String email) {
     if (email == null || !email.contains("@")) {
         throw new IllegalArgumentException("E-mail must contain @.");
     }
-    this.email = normalizeEmail(email);
+    this.email = email.trim();
 }
 
-private String normalizeEmail(String value) {
-    return value.trim().toLowerCase();
+public void setMatriculationNumber(String value) {
+    this.matriculationNumber = value == null ? "" : value.trim();
 }
 ```
 
-That means `XUE@example.com` and `xue@example.com` become the same identity.
+That means e-mail case does not decide whether two participants are equal.
 
 ---
 
-# equals(): Same Email, Same Person
+# equals(): Same Matriculation Number
 
-`equals()` compares only the normalized e-mail field.
+`equals()` compares the matriculation number, not the e-mail address.
 
 ```java {all|2|7}
 @Override
@@ -297,7 +298,9 @@ public boolean equals(Object other) {
     if (this == other) return true;
     if (!(other instanceof Participant)) return false;
     Participant that = (Participant) other;
-    return Objects.equals(email, that.email);
+    return !matriculationNumber.isEmpty()
+        && Objects.equals(matriculationNumber,
+                          that.matriculationNumber);
 }
 ```
 
@@ -313,7 +316,9 @@ Both methods must use the same identity field.
 ```java {all|3}
 @Override
 public int hashCode() {
-    return Objects.hash(email);
+    return matriculationNumber.isEmpty()
+        ? System.identityHashCode(this)
+        : Objects.hash(matriculationNumber);
 }
 ```
 
@@ -323,35 +328,48 @@ private final HashSet<Participant> participants;
 participants.add(registration.getParticipant());
 ```
 
-If two participants have the same normalized e-mail, they produce the same
+If two participants have the same matriculation number, they produce the same
 hash input and compare equal.
 
 ---
 
 # JUnit Test
 
-`CampusActivityPlannerTest` covers three important behaviors.
+This test shows the full waiting-list flow.
+The workshop capacity is `1`, so the first registration fills the activity.
 
-```java {all|1-8|10-14}
+<div class="text-[0.7em] leading-tight">
+
+```java {all|2-5|7-8|10-13|15-17}
 @Test
 void fullActivityUsesWaitingListAndPromotesAfterCancel() {
+    CampusActivityPlanner planner = new CampusActivityPlanner();
+    Workshop workshop = new Workshop("T01", "Test Workshop",
+        java.time.LocalDate.of(2026, 6, 1),
+        "Lab", 1, "Testing", "Beginner");
+    planner.addActivity(workshop);
+
+    Participant first = new Participant("First Student", "first@example.com", "10001");
+    Participant second = new Participant("Second Student", "second@example.com", "10002");
+
     assertTrue(planner.register("T01",
         new StudentRegistration(first)));
+    assertEquals(0, workshop.getFreePlaces());
+
     assertTrue(planner.register("T01",
         new VolunteerRegistration(second)));
+    assertEquals(1, workshop.getRegistrations().size());
     assertEquals(1, workshop.getWaitingList().size());
-}
 
-@Test
-void duplicateParticipantCannotRegisterTwiceForSameActivity() {
-    Participant duplicate = new Participant("Xue Wang", "XUE@example.com");
-    assertFalse(planner.register("W01", duplicate));
+    assertTrue(planner.cancel("T01", first));
+    assertEquals(second, workshop.getRegistrations().get(0).getParticipant());
+    assertEquals(0, workshop.getWaitingList().size());
 }
 ```
 
-Also tested:
-- waiting-list promotion after cancellation
-- overloaded `findActivities(String)` and `findActivities(LocalDate)`
+</div>
+
+It verifies registration, waiting-list insertion, cancellation and promotion.
 
 ---
 
@@ -359,20 +377,21 @@ Also tested:
 
 Problem found while checking duplicate participant behavior:
 
-- Project docs mentioned e-mail / matriculation number
-- Test creates `xue@example.com` and `XUE@example.com`
-- Email is normalized to lowercase
+- Project docs mentioned both e-mail and matriculation number
+- E-mail case should not decide participant identity
+- Matriculation number is the stable student identifier
 - Equality must use one stable identity rule
 - `hashCode()` must match the same field as `equals()`
 
 Fix:
 
 ```java
-return Objects.equals(email, that.email);
+return Objects.equals(matriculationNumber,
+                      that.matriculationNumber);
 ```
 
 ```java
-return Objects.hash(email);
+return Objects.hash(matriculationNumber);
 ```
 
 Result: `HashSet` and duplicate registration checks now use the same identity rule.
@@ -387,7 +406,7 @@ Result: `HashSet` and duplicate registration checks now use the same identity ru
 4. Register a participant with a name, email and registration type
 5. Fill a small-capacity activity to show the waiting list
 6. Use `Show free places` to demonstrate stream filtering
-7. Try registering the same email twice to show duplicate prevention
+7. Try registering the same matriculation number twice to show duplicate prevention
 
 ---
 

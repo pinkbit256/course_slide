@@ -342,7 +342,7 @@ hash input and compare equal.
 This test shows the full waiting-list flow.
 The workshop capacity is `1`, so the first registration fills the activity.
 
-<div class="text-[0.7em] leading-tight">
+<div class="text-[0.58em] leading-[1.05]">
 
 ```java {all|2-5|7-8|10-13|15-17}
 @Test

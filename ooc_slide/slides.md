@@ -285,6 +285,7 @@ public void setMatriculationNumber(String value) {
 ```
 
 That means e-mail case does not decide whether two participants are equal.
+Same e-mail with different matriculation numbers is allowed.
 
 ---
 
@@ -305,6 +306,9 @@ public boolean equals(Object other) {
 ```
 
 This is used when the app checks for duplicate participants in an activity.
+
+Example: `shared@example.com / 10001` and `shared@example.com / 10002`
+are two different participants.
 
 ---
 
@@ -375,23 +379,26 @@ It verifies registration, waiting-list insertion, cancellation and promotion.
 
 # Error Found and Debugged
 
-Problem found while checking duplicate participant behavior:
+Problem found while testing participant identity:
 
-- Project docs mentioned both e-mail and matriculation number
-- E-mail case should not decide participant identity
-- Matriculation number is the stable student identifier
-- Equality must use one stable identity rule
-- `hashCode()` must match the same field as `equals()`
+- Old logic treated e-mail as the participant identity
+- Same e-mail with different matriculation numbers was too easy to reject
+- E-mail is contact data, not the stable student identifier
+- Matriculation number should decide duplicate registration
+- `equals()` and `hashCode()` must use that same rule
 
 Fix:
 
 ```java
-return Objects.equals(matriculationNumber,
+return !matriculationNumber.isEmpty()
+    && Objects.equals(matriculationNumber,
                       that.matriculationNumber);
 ```
 
 ```java
-return Objects.hash(matriculationNumber);
+return matriculationNumber.isEmpty()
+    ? System.identityHashCode(this)
+    : Objects.hash(matriculationNumber);
 ```
 
 Result: `HashSet` and duplicate registration checks now use the same identity rule.

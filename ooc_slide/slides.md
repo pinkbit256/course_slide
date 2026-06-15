@@ -16,7 +16,28 @@ JavaFX desktop application for browsing campus activities and managing registrat
 
 Object-Oriented Concepts - Summer Semester 2026
 
-Omar Abdelmegid - Xue Wang - Yousuf Sidiqi
+Yousuf Sidiqi - Omar Abdelmegid - Xue Wang
+
+---
+
+# Presentation Structure
+
+| Presenter | Main focus | Rubric points covered |
+| --- | --- | --- |
+| Yousuf Sidiqi | Application, GUI and class model | what the app does, JavaFX GUI image, UML, classes created |
+| Omar Abdelmegid | OOP design and data structures | inheritance, polymorphism, collections, HashMap, HashSet, Comparator, lambdas, streams |
+| Xue Wang | Identity, tests and reflection | equals/hashCode, JUnit test, debugged error, future improvements |
+
+This order follows the assessment requirements directly, so each required topic has a clear place.
+
+---
+layout: center
+class: text-center
+---
+
+# Yousuf Sidiqi
+
+Application, JavaFX GUI, UML and created classes
 
 ---
 layout: two-cols
@@ -38,48 +59,55 @@ layout: two-cols
 
 # JavaFX GUI
 
-The GUI is implemented in `CampusActivityGUI`.
+<img src="./public/gui-screenshot.png" class="h-95 mx-auto rounded shadow object-contain" />
 
-- Header includes the required image
-- Left side: sorted activity list
-- Center: details, confirmed participants and waiting list
-- Right side: tabs for hosting and joining activities
-- Buttons: `Add Activity`, `Register`, `Show free places`, `Show all`
-
-```java {all|5-8|10-13}
-ImageView poster = new ImageView(loadCampusImage());
-poster.setFitWidth(230);
-poster.setFitHeight(110);
-
-Button registerButton = new Button("Register");
-registerButton.setOnAction(event ->
-        registerSelectedParticipant());
-
-Button freeOnlyButton = new Button("Show free places");
-freeOnlyButton.setOnAction(event -> activityList.setItems(
-        FXCollections.observableArrayList(
-                planner.getActivitiesWithFreePlaces())));
-```
+<div class="text-sm mt-2">
+Header image, sorted activity list, activity details, waiting list, hosting tab and joining tab.
+</div>
 
 ---
 
 # UML Class Diagram
 
-<img src="./public/uml-diagram.jpeg" class="h-110 mx-auto object-contain rounded shadow" />
+<img src="./public/uml-diagram.jpeg" class="h-105 mx-auto object-contain rounded shadow" />
 
+---
+layout: two-cols
+class: text-sm
 ---
 
 # Classes We Created and Why
 
-| Class | Purpose |
+| Class | Why we created it |
 | --- | --- |
-| `CampusActivity` | Abstract base class for shared activity data and behavior |
-| `Workshop`, `GuestLecture`, `SportsActivity`, `GameNight` | Concrete activity types with specific fields |
-| `Participant` | Stores person data and duplicate identity logic |
-| `Registration` | Connects a participant to an activity |
-| `Student`, `Standard`, `Volunteer`, `SpeakerRegistration` | Different fees and waiting-list priorities |
-| `CampusActivityPlanner` | Manager/controller for collections, search, sorting and demo data |
+| `CampusActivity` | Shared activity data and behavior |
+| `Workshop`, `GuestLecture` | Specific activity types |
+| `SportsActivity`, `GameNight` | More concrete activity types |
+| `Participant` | Person data and identity logic |
+
+::right::
+
+| Class | Why we created it |
+| --- | --- |
+| `Registration` | Connects participant to activity |
+| `StudentRegistration` | Student fee behavior |
+| `StandardRegistration` | Default registration behavior |
+| `VolunteerRegistration` | Free fee and higher priority |
+| `SpeakerRegistration` | Speaker-specific registration |
+| `CampusActivityPlanner` | Collections, search and sorting |
 | `CampusActivityGUI` | JavaFX user interface |
+
+Main reason: keep activity data, participant identity, registration behavior
+and GUI code separate.
+
+---
+layout: center
+class: text-center
+---
+
+# Omar Abdelmegid
+
+Inheritance, polymorphism, collections and Java features
 
 ---
 
@@ -110,7 +138,7 @@ Why:
 
 `CampusActivity` references can call subclass behavior.
 
-```java {all|1-4|6-13}
+```java {all|1-4|6-16}
 public abstract class CampusActivity {
     public abstract String getActivityType();
     public String describe() { ... }
@@ -139,7 +167,7 @@ uses its own `describe()` implementation.
 The GUI creates different subclasses, but the rest of the app receives
 one common type: `Registration`.
 
-```java {all|1|3|6|9}
+```java {all|2-4|5-7|8}
 private Registration createRegistration(Participant participant) {
     if ("Volunteer".equals(type)) {
         return new VolunteerRegistration(participant);
@@ -159,7 +187,7 @@ After this point, `CampusActivity` does not need to know the exact subclass.
 
 `Registration.describe()` calls methods that subclasses override.
 
-```java {all|1-4|6-9}
+```java {all|1-5|7-9}
 public String describe() {
     return getRegistrationType()
         + ": " + participant
@@ -173,7 +201,7 @@ public double getFee() { return 10.0; }       // base
 
 The same happens when the waiting list is sorted:
 
-```java {all|1|3-5}
+```java {all|1|3-4}
 waitingList.sort((first, second) ->
     Integer.compare(
         second.getPriority(),
@@ -217,9 +245,11 @@ Why:
 
 ---
 
-# HashMap, HashSet, Comparator
+# HashMap and HashSet
 
-```java {all|1-4|6-9|11-15}
+These two collections have different jobs.
+
+```java {all|1-3|5-7|9}
 private final HashMap<String, CampusActivity> activityMap;
 private final HashSet<Participant> participants;
 private final TreeSet<CampusActivity> sortedActivities;
@@ -229,40 +259,60 @@ public CampusActivity findById(String id) {
 }
 
 participants.add(registration.getParticipant());
+```
 
+- `HashMap` gives fast activity lookup by activity id
+- `HashSet` prevents duplicate participants using `equals()` and `hashCode()`
+- `TreeSet` keeps activities ordered by date through `Comparable`
+
+---
+
+# Comparator, Lambdas and Streams
+
+```java {all|1-4|6-8|10-12}
 return activities.stream()
     .sorted(Comparator.comparingInt(CampusActivity::getCapacity)
         .thenComparing(CampusActivity::getTitle))
     .collect(Collectors.toList());
+
+return activities.stream()
+    .filter(CampusActivity::hasFreePlaces)
+    .collect(Collectors.toList());
+
+return activities.stream()
+    .map(activity -> activity.getId() + " | " + activity.describe())
+    .collect(Collectors.toList());
 ```
 
-The `Comparator` sorts by capacity first and title second.
+- `Comparator` sorts activities by capacity, then title
+- Lambda expressions make the sorting and mapping logic short
+- Streams are used for searching, filtering and display text
 
 ---
 
-# Lambdas and Streams
+# Streams: Grouping Example
 
-Streams are used for searching, filtering, grouping and mapping.
+Streams are also used to count activities by type.
 
-```java {all|1-5|7-10|12-15}
-public List<CampusActivity> getActivitiesWithFreePlaces() {
-    return activities.stream()
-        .filter(CampusActivity::hasFreePlaces)
-        .collect(Collectors.toList());
-}
-
+```java {all|1-5}
 public Map<String, Long> countActivitiesByType() {
     return activities.stream()
         .collect(Collectors.groupingBy(
             CampusActivity::getActivityType, Collectors.counting()));
 }
-
-public List<String> getDisplayLines() {
-    return activities.stream()
-        .map(activity -> activity.getId() + " | " + activity.describe())
-        .collect(Collectors.toList());
-}
 ```
+
+This is useful for summary information, for example how many workshops,
+lectures, sports activities and game nights are in the planner.
+
+---
+layout: center
+class: text-center
+---
+
+# Xue Wang
+
+equals/hashCode, JUnit test, debugged error and improvements
 
 ---
 
@@ -271,7 +321,7 @@ public List<String> getDisplayLines() {
 `Participant` uses one identity rule: the matriculation number.
 E-mail is still stored, but it is not the unique identifier.
 
-```java {all|1-4|6-9}
+```java {all|1-6|8-10}
 public void setEmail(String email) {
     if (email == null || !email.contains("@")) {
         throw new IllegalArgumentException("E-mail must contain @.");
@@ -293,7 +343,7 @@ Same e-mail with different matriculation numbers is allowed.
 
 `equals()` compares the matriculation number, not the e-mail address.
 
-```java {all|2|7}
+```java {all|1-9}
 @Override
 public boolean equals(Object other) {
     if (this == other) return true;
@@ -317,7 +367,7 @@ are two different participants.
 `HashSet<Participant>` uses `hashCode()` first, then `equals()`.
 Both methods must use the same identity field.
 
-```java {all|3}
+```java {all|1-6}
 @Override
 public int hashCode() {
     return matriculationNumber.isEmpty()
@@ -337,14 +387,12 @@ hash input and compare equal.
 
 ---
 
-# JUnit Test
+# JUnit Test: Fill Activity
 
 This test shows the full waiting-list flow.
 The workshop capacity is `1`, so the first registration fills the activity.
 
-<div class="text-[0.58em] leading-[1.05]">
-
-```java {all|2-5|7-8|10-13|15-17}
+```java {all|1-7|1,9-10|1,12-14|1,16-19}
 @Test
 void fullActivityUsesWaitingListAndPromotesAfterCancel() {
     CampusActivityPlanner planner = new CampusActivityPlanner();
@@ -364,16 +412,28 @@ void fullActivityUsesWaitingListAndPromotesAfterCancel() {
         new VolunteerRegistration(second)));
     assertEquals(1, workshop.getRegistrations().size());
     assertEquals(1, workshop.getWaitingList().size());
-
-    assertTrue(planner.cancel("T01", first));
-    assertEquals(second, workshop.getRegistrations().get(0).getParticipant());
-    assertEquals(0, workshop.getWaitingList().size());
 }
 ```
 
-</div>
+The second registration is accepted, but goes to the waiting list.
 
-It verifies registration, waiting-list insertion, cancellation and promotion.
+---
+
+# JUnit Test: Promote Waiting List
+
+When the first participant cancels, the waiting-list entry moves into confirmed registrations.
+
+```java {all|1|2|3}
+assertTrue(planner.cancel("T01", first));
+assertEquals(second, workshop.getRegistrations().get(0).getParticipant());
+assertEquals(0, workshop.getWaitingList().size());
+```
+
+Full behavior verified:
+
+- first registration fills the activity
+- second registration enters the waiting list
+- cancellation promotes the waiting-list participant
 
 ---
 

@@ -138,7 +138,7 @@ Why:
 
 `CampusActivity` references can call subclass behavior.
 
-```java {all|1-4|6-16}
+```java
 public abstract class CampusActivity {
     public abstract String getActivityType();
     public String describe() { ... }
@@ -167,7 +167,7 @@ uses its own `describe()` implementation.
 The GUI creates different subclasses, but the rest of the app receives
 one common type: `Registration`.
 
-```java {all|2-4|5-7|8}
+```java
 private Registration createRegistration(Participant participant) {
     if ("Volunteer".equals(type)) {
         return new VolunteerRegistration(participant);
@@ -180,33 +180,7 @@ private Registration createRegistration(Participant participant) {
 ```
 
 After this point, `CampusActivity` does not need to know the exact subclass.
-
----
-
-# Polymorphism: Dynamic Dispatch
-
-`Registration.describe()` calls methods that subclasses override.
-
-```java {all|1-5|7-9}
-public String describe() {
-    return getRegistrationType()
-        + ": " + participant
-        + ", fee EUR " + getFee();
-}
-
-public double getFee() { return 10.0; }       // base
-// StudentRegistration: 5.0
-// Volunteer/Speaker: 0.0
-```
-
-The same happens when the waiting list is sorted:
-
-```java {all|1|3-4}
-waitingList.sort((first, second) ->
-    Integer.compare(
-        second.getPriority(),
-        first.getPriority()));
-```
+Overridden fee and priority behavior still comes from the concrete registration type.
 
 ---
 
@@ -214,19 +188,9 @@ waitingList.sort((first, second) ->
 
 The design also uses HAS-A relationships.
 
-```java
-public abstract class CampusActivity {
-    private final ArrayList<Registration> registrations;
-    private final ArrayList<Registration> waitingList;
-}
-
-public class Registration {
-    private final Participant participant;
-}
-```
-
-Why:
 - A campus activity has many registrations
+- A campus activity has one confirmed registration list
+- A campus activity has one waiting list
 - A registration has one participant
 - This keeps activity logic separate from participant identity data
 
@@ -249,18 +213,6 @@ Why:
 
 These two collections have different jobs.
 
-```java {all|1-3|5-7|9}
-private final HashMap<String, CampusActivity> activityMap;
-private final HashSet<Participant> participants;
-private final TreeSet<CampusActivity> sortedActivities;
-
-public CampusActivity findById(String id) {
-    return activityMap.get(id.trim());
-}
-
-participants.add(registration.getParticipant());
-```
-
 - `HashMap` gives fast activity lookup by activity id
 - `HashSet` prevents duplicate participants using `equals()` and `hashCode()`
 - `TreeSet` keeps activities ordered by date through `Comparable`
@@ -269,7 +221,7 @@ participants.add(registration.getParticipant());
 
 # Comparator, Lambdas and Streams
 
-```java {all|1-4|6-8|10-12}
+```java
 return activities.stream()
     .sorted(Comparator.comparingInt(CampusActivity::getCapacity)
         .thenComparing(CampusActivity::getTitle))
@@ -287,23 +239,6 @@ return activities.stream()
 - `Comparator` sorts activities by capacity, then title
 - Lambda expressions make the sorting and mapping logic short
 - Streams are used for searching, filtering and display text
-
----
-
-# Streams: Grouping Example
-
-Streams are also used to count activities by type.
-
-```java {all|1-5}
-public Map<String, Long> countActivitiesByType() {
-    return activities.stream()
-        .collect(Collectors.groupingBy(
-            CampusActivity::getActivityType, Collectors.counting()));
-}
-```
-
-This is useful for summary information, for example how many workshops,
-lectures, sports activities and game nights are in the planner.
 
 ---
 layout: center

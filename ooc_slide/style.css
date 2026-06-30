@@ -1,0 +1,189 @@
+.slidev-layout {
+  padding: 2.2rem 3rem;
+}
+
+.slidev-layout h1 {
+  font-size: 2.35rem;
+  margin-bottom: 1.2rem;
+}
+
+.slidev-layout h2 {
+  font-size: 1.55rem;
+  line-height: 1.25;
+  color: #355c45;
+}
+
+.slidev-layout h3 {
+  font-size: 1.15rem;
+  margin-bottom: 0.45rem;
+  color: #2f4858;
+}
+
+.slidev-layout p,
+.slidev-layout li {
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.cover {
+  position: relative;
+  min-height: 23rem;
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+  overflow: hidden;
+}
+
+.cover p {
+  max-width: 36rem;
+  font-size: 1.15rem;
+}
+
+.cover > div {
+  position: relative;
+  z-index: 1;
+  max-width: 38rem;
+}
+
+.cover-bg-logo {
+  position: absolute;
+  right: 2rem;
+  top: 0.5rem;
+  width: 21rem;
+  height: 21rem;
+  object-fit: contain;
+  opacity: 0.22;
+  z-index: 0;
+}
+
+.tagline,
+.small-caption {
+  color: #6b7280;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.card,
+.mechanics > div,
+.topic {
+  border: 1px solid #d6dccf;
+  border-radius: 8px;
+  background: #fbfbf6;
+  padding: 1rem;
+}
+
+.center-note,
+.design-line {
+  margin-top: 1.4rem;
+  border-left: 5px solid #6a8f5d;
+  padding: 0.8rem 1rem;
+  background: #f3f7ee;
+  font-size: 1.08rem;
+  line-height: 1.45;
+}
+
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.topic {
+  min-height: 7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.journey {
+  display: grid;
+  grid-template-columns: 1fr 1.5rem 1fr 1.5rem 1fr 1.5rem 1fr 1.5rem 1fr;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 1.5rem;
+}
+
+.journey > div {
+  border-radius: 8px;
+  background: #2f4858;
+  color: white;
+  padding: 1rem 0.65rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.journey span {
+  height: 3px;
+  background: #6a8f5d;
+}
+
+.mt {
+  margin-top: 2rem;
+}
+
+.image-box {
+  width: 100%;
+  height: 16rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f4f4ef;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+.image-box img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.image-box.large {
+  height: 20rem;
+}
+
+.mechanics,
+.principles {
+  display: grid;
+  gap: 1rem;
+}
+
+.mechanics {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.mechanics p {
+  font-size: 0.92rem;
+}
+
+.teacher {
+  width: 72%;
+  height: 8rem;
+  margin: 1.4rem auto 0;
+  background: #f2efe6;
+}
+
+.principles {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.certificate {
+  width: 52%;
+  height: 8.5rem;
+  margin: 1.2rem auto 0;
+}

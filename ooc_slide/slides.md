@@ -17,7 +17,7 @@ mdc: true
   <div>
     <h2>A playful first step into student life in Germany</h2>
     <p>
-      A Godot prototype that helps new international students learn campus rules,
+      A delivered Godot learning game that helps new international students learn campus rules,
       daily language and social expectations through short quiz challenges.
     </p>
     <div class="tagline">Software Engineering Jump Start - TH Aschaffenburg</div>
@@ -171,7 +171,7 @@ mdc: true
 <div class="principles">
   <div class="card">
     <h3>Keep It Focused</h3>
-    <p>Four topics are enough to prove the learning loop without making the prototype too large.</p>
+    <p>Four topics keep the final build focused while still showing the complete learning loop.</p>
   </div>
   <div class="card">
     <h3>Make Choices Meaningful</h3>
@@ -188,12 +188,14 @@ mdc: true
 </div>
 
 ---
+class: result-slide
+---
 
 # Result and Next Steps
 
 <div class="split">
   <div>
-    <h3>Current prototype</h3>
+    <h3>Final deliverable</h3>
     <ul>
       <li>Playable Godot game flow</li>
       <li>Campus map and topic selection</li>
@@ -210,10 +212,6 @@ mdc: true
       <li>More polished sound and animation feedback</li>
     </ul>
   </div>
-</div>
-
-<div class="image-box certificate">
-  <img :src="'/certificate_template.png'" />
 </div>
 
 ---
